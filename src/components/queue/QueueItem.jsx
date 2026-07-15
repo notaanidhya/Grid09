@@ -16,16 +16,17 @@ const priorityBg = {
 
 /** Placeholder thumbnail — colored square with frame number */
 function FramePlaceholder({ videoId, priority }) {
-  const colorMap = {
-    critical: "from-alert-red/30 to-void-300",
-    high:     "from-alert-amber/30 to-void-300",
-    medium:   "from-alert-cyan/20 to-void-300",
-  };
+  const isGeneric = videoId === "VID-7746";
+  const priorityImage = priority === "critical" || priority === "high" ? "synthetic" : "clean";
+  const thumbUrl = isGeneric
+    ? `/backgrounds/frame-${priorityImage}.png`
+    : `/frames/thumb-${videoId.replace("VID-", "")}.png`;
+
   return (
     <div 
       className={`w-14 h-10 flex-shrink-0 clip-corners-sm border border-cream/10 flex items-center justify-center`}
       style={{
-        backgroundImage: `url('/frames/thumb-${videoId.replace("VID-", "")}.png')`,
+        backgroundImage: `url('${thumbUrl}')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundColor: priority === "critical" ? "rgba(255,59,59,0.3)" : priority === "high" ? "rgba(255,176,32,0.3)" : "rgba(0,229,255,0.2)",

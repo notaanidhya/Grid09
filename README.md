@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GRID-9 // Truth Node
 
 ![GRID-9 Demo](public/backgrounds/hero-primary.png)
@@ -71,3 +72,6 @@ src/
 ## 📜 License
 
 This project was built for demonstration purposes. Feel free to fork and modify!
+=======
+# Grid09
+>>>>>>> 7d7582025f2dd08122c4ec2c2e3da4bb2590d32b

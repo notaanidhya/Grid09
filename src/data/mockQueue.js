@@ -1,20 +1,6 @@
 // Mock queue of videos pending verification
 export const mockQueue = [
   {
-    id: "VID-7741",
-    title: "MINISTER DENIES ALLIANCE COLLAPSE",
-    source: "TerraFeed Social",
-    reach: 8.2,
-    reachUnit: "M",
-    reachRaw: 8200000,
-    thumbnail: null,
-    status: "analyzing",   // "pending" | "analyzing" | "resolved"
-    priority: "critical",  // "critical" | "high" | "medium"
-    duration: "00:47",
-    uploadedAt: "2031-07-15T14:33:12Z",
-    verdict: null,
-  },
-  {
     id: "VID-7742",
     title: "PROTEST CROWD SIZE CLAIMED 200K",
     source: "CitizenStream",
@@ -22,7 +8,7 @@ export const mockQueue = [
     reachUnit: "M",
     reachRaw: 3100000,
     thumbnail: null,
-    status: "pending",
+    status: "analyzing",
     priority: "high",
     duration: "02:14",
     uploadedAt: "2031-07-15T14:41:05Z",
@@ -72,8 +58,8 @@ export const mockQueue = [
   },
   {
     id: "VID-7746",
-    title: "ELECTION OFFICIAL CONCESSION SPEECH",
-    source: "PublicRecord Feed",
+    title: "GENERIC DEEPFAKE SWAP DEMONSTRATION",
+    source: "Training Data",
     reach: 12.1,
     reachUnit: "M",
     reachRaw: 12100000,
@@ -96,6 +82,20 @@ export const mockQueue = [
     priority: "medium",
     duration: "01:07",
     uploadedAt: "2031-07-15T15:19:33Z",
+    verdict: null,
+  },
+  {
+    id: "VID-7741",
+    title: "MINISTER DENIES ALLIANCE COLLAPSE",
+    source: "TerraFeed Social",
+    reach: 8.2,
+    reachUnit: "M",
+    reachRaw: 8200000,
+    thumbnail: null,
+    status: "pending",
+    priority: "critical",
+    duration: "00:47",
+    uploadedAt: "2031-07-15T14:33:12Z",
     verdict: null,
   },
 ];

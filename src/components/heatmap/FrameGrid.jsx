@@ -111,7 +111,11 @@ export default function FrameGrid({ scrubPosition = 1 }) {
               className="relative aspect-square clip-corners-sm border cursor-pointer
                 flex items-center justify-center overflow-hidden group"
               style={{
-                backgroundImage: isInScrubRange ? `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.png')` : "none",
+                backgroundImage: isInScrubRange 
+                  ? state.activeVideoId === "VID-7746"
+                    ? `url('/backgrounds/frame-${frame.anomalyScore >= 0.7 ? 'synthetic' : 'clean'}.png')`
+                    : `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.png')` 
+                  : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundColor: isInScrubRange ? colors.bg : "rgba(255,255,255,0.02)",
