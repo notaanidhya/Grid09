@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMockFrames } from "../../data/mockFrames";
 import { useConsole } from "../../context/ConsoleContext";
@@ -51,15 +51,69 @@ function FrameTooltip({ frame, x, y }) {
   );
 }
 
+// Memoized individual frame tile — only re-renders when its specific props change
+const FrameTile = memo(function FrameTile({
+  frame, isInScrubRange, isSelected, bgUrl,
+  onMouseEnter, onMouseLeave, onClick
+}) {
+  const colors = getFrameColor(frame.anomalyScore);
+
+  return (
+    <button
+      id={`frame-${frame.frameId}`}
+      className="relative aspect-square clip-corners-sm border cursor-pointer
+        flex items-center justify-center overflow-hidden group
+        transition-transform duration-100 hover:scale-110 active:scale-95"
+      style={{
+        backgroundImage: isInScrubRange ? bgUrl : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundColor: isInScrubRange ? colors.bg : "rgba(255,255,255,0.02)",
+        backgroundBlendMode: "overlay",
+        borderColor: isInScrubRange ? colors.border : "rgba(255,255,255,0.06)",
+        boxShadow: isInScrubRange && frame.anomalyScore >= 0.7 ? colors.shadow : "none",
+        willChange: "transform",
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+      aria-label={`Frame ${frame.frameId}, anomaly score ${(frame.anomalyScore * 100).toFixed(0)}%`}
+    >
+      {/* Frame number */}
+      <span className="text-[8px] font-mono text-cream/20 group-hover:text-cream/60
+        transition-colors select-none">
+        {String(frame.frameId).padStart(2, "0")}
+      </span>
+
+      {/* Flag dot */}
+      {frame.flags.length > 0 && isInScrubRange && (
+        <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full"
+          style={{ backgroundColor: colors.border }} />
+      )}
+
+      {/* Selected ring */}
+      {isSelected && (
+        <div className="absolute inset-0 border-2 border-alert-cyan
+          pointer-events-none animate-pulse-slow" />
+      )}
+    </button>
+  );
+});
+
 export default function FrameGrid({ scrubPosition = 1 }) {
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const { state } = useConsole();
-  
-  const mockFrames = getMockFrames(state.activeVideoId);
   const [selectedFrame, setSelectedFrame] = useState(null);
+  const { state } = useConsole();
 
-  const handleMouseEnter = (frame, e) => {
+  const mockFrames = useMemo(() => getMockFrames(state.activeVideoId), [state.activeVideoId]);
+
+  // Compute the single background URL once, shared across all tiles
+  const bgUrl = state.activeVideoId === "VID-7746"
+    ? null // handled per-frame below for generic
+    : `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.webp')`;
+
+  const handleMouseEnter = useCallback((frame, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const containerRect = e.currentTarget.closest("[data-frame-grid]").getBoundingClientRect();
     setHoveredFrame(frame);
@@ -67,16 +121,20 @@ export default function FrameGrid({ scrubPosition = 1 }) {
       x: rect.left - containerRect.left + rect.width / 2,
       y: rect.top  - containerRect.top,
     });
-  };
+  }, []);
 
-  // Derive stats dynamically for the legend
-  const stats = {
+  const handleMouseLeave = useCallback(() => setHoveredFrame(null), []);
+
+  // Derive stats dynamically for the legend (memoized)
+  const stats = useMemo(() => ({
     totalFrames: mockFrames.length,
     flaggedHigh: mockFrames.filter(f => f.anomalyScore >= 0.7).length,
     flaggedMedium: mockFrames.filter(f => f.anomalyScore >= 0.4 && f.anomalyScore < 0.7).length,
     flaggedClean: mockFrames.filter(f => f.anomalyScore < 0.4).length,
     overallScore: (mockFrames.reduce((a, b) => a + b.anomalyScore, 0) / mockFrames.length).toFixed(2),
-  };
+  }), [mockFrames]);
+
+  const visibleCount = Math.max(1, Math.floor(scrubPosition * mockFrames.length));
 
   return (
     <div className="relative" data-frame-grid="">
@@ -100,54 +158,23 @@ export default function FrameGrid({ scrubPosition = 1 }) {
       {/* Frame grid — 8 columns */}
       <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(8, 1fr)" }}>
         {mockFrames.map((frame) => {
-          const colors = getFrameColor(frame.anomalyScore);
-          const isInScrubRange = frame.frameId <= Math.max(1, Math.floor(scrubPosition * mockFrames.length));
+          const isInScrubRange = frame.frameId <= visibleCount;
           const isSelected = selectedFrame?.frameId === frame.frameId;
+          const tileBgUrl = bgUrl
+            ? bgUrl
+            : `url('/backgrounds/frame-${frame.anomalyScore >= 0.7 ? 'synthetic' : 'clean'}.webp')`;
 
           return (
-            <motion.button
+            <FrameTile
               key={frame.frameId}
-              id={`frame-${frame.frameId}`}
-              className="relative aspect-square clip-corners-sm border cursor-pointer
-                flex items-center justify-center overflow-hidden group"
-              style={{
-                backgroundImage: isInScrubRange 
-                  ? state.activeVideoId === "VID-7746"
-                    ? `url('/backgrounds/frame-${frame.anomalyScore >= 0.7 ? 'synthetic' : 'clean'}.png')`
-                    : `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.png')` 
-                  : "none",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundColor: isInScrubRange ? colors.bg : "rgba(255,255,255,0.02)",
-                backgroundBlendMode: "overlay",
-                borderColor: isInScrubRange ? colors.border : "rgba(255,255,255,0.06)",
-                boxShadow: isInScrubRange && frame.anomalyScore >= 0.7 ? colors.shadow : "none",
-              }}
+              frame={frame}
+              isInScrubRange={isInScrubRange}
+              isSelected={isSelected}
+              bgUrl={tileBgUrl}
               onMouseEnter={(e) => handleMouseEnter(frame, e)}
-              onMouseLeave={() => setHoveredFrame(null)}
+              onMouseLeave={handleMouseLeave}
               onClick={() => setSelectedFrame(isSelected ? null : frame)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              aria-label={`Frame ${frame.frameId}, anomaly score ${(frame.anomalyScore * 100).toFixed(0)}%`}
-            >
-              {/* Frame number */}
-              <span className="text-[8px] font-mono text-cream/20 group-hover:text-cream/60
-                transition-colors select-none">
-                {String(frame.frameId).padStart(2, "0")}
-              </span>
-
-              {/* Flag count indicator */}
-              {frame.flags.length > 0 && isInScrubRange && (
-                <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: colors.border }} />
-              )}
-
-              {/* Selected ring */}
-              {isSelected && (
-                <div className="absolute inset-0 border-2 border-alert-cyan
-                  pointer-events-none animate-pulse-slow" />
-              )}
-            </motion.button>
+            />
           );
         })}
       </div>

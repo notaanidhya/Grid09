@@ -36,7 +36,7 @@ export default function LandingPage() {
     <div 
       className="relative min-h-screen flex flex-col overflow-hidden bg-void"
       style={{
-        backgroundImage: "url('/backgrounds/hero-primary.png')",
+        backgroundImage: "url('/backgrounds/hero-primary.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}

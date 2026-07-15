@@ -52,7 +52,7 @@ export default function VerdictHistoryPage() {
     <div 
       className="min-h-screen flex flex-col bg-void bg-fixed"
       style={{
-        backgroundImage: "url('/backgrounds/hero-tertiary.png')",
+        backgroundImage: "url('/backgrounds/hero-tertiary.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}

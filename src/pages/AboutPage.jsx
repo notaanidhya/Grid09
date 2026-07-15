@@ -47,7 +47,7 @@ export default function AboutPage() {
     <div 
       className="min-h-screen bg-void bg-fixed"
       style={{
-        backgroundImage: "url('/backgrounds/hero-secondary.png')",
+        backgroundImage: "url('/backgrounds/hero-secondary.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}

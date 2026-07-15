@@ -19,8 +19,8 @@ function FramePlaceholder({ videoId, priority }) {
   const isGeneric = videoId === "VID-7746";
   const priorityImage = priority === "critical" || priority === "high" ? "synthetic" : "clean";
   const thumbUrl = isGeneric
-    ? `/backgrounds/frame-${priorityImage}.png`
-    : `/frames/thumb-${videoId.replace("VID-", "")}.png`;
+    ? `/backgrounds/frame-${priorityImage}.webp`
+    : `/frames/thumb-${videoId.replace("VID-", "")}.webp`;
 
   return (
     <div 
