@@ -1,10 +1,23 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ConsoleProvider } from "./context/ConsoleContext";
-import LandingPage from "./pages/LandingPage";
-import ConsolePage from "./pages/ConsolePage";
-import VerdictHistoryPage from "./pages/VerdictHistoryPage";
-import AboutPage from "./pages/AboutPage";
+import { lazy, Suspense } from "react";
+
+// Lazy-load all pages — each becomes a separate chunk, loaded only when visited
+const LandingPage       = lazy(() => import("./pages/LandingPage"));
+const ConsolePage       = lazy(() => import("./pages/ConsolePage"));
+const VerdictHistoryPage = lazy(() => import("./pages/VerdictHistoryPage"));
+const AboutPage         = lazy(() => import("./pages/AboutPage"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen bg-void flex items-center justify-center">
+      <p className="font-mono text-xs text-cream/30 tracking-widest animate-pulse">
+        LOADING // STAND BY
+      </p>
+    </div>
+  );
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -27,7 +40,9 @@ export default function App() {
   return (
     <ConsoleProvider>
       <BrowserRouter>
-        <AnimatedRoutes />
+        <Suspense fallback={<PageLoader />}>
+          <AnimatedRoutes />
+        </Suspense>
       </BrowserRouter>
     </ConsoleProvider>
   );

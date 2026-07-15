@@ -108,10 +108,9 @@ export default function FrameGrid({ scrubPosition = 1 }) {
 
   const mockFrames = useMemo(() => getMockFrames(state.activeVideoId), [state.activeVideoId]);
 
-  // Compute the single background URL once, shared across all tiles
-  const bgUrl = state.activeVideoId === "VID-7746"
-    ? null // handled per-frame below for generic
-    : `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.webp')`;
+  // Compute background URL — VID-7748 and VID-7749 use their own thumbnails
+  // (which are copies of frame-clean and frame-synthetic respectively)
+  const bgUrl = `url('/frames/thumb-${state.activeVideoId.replace("VID-", "")}.webp')`;
 
   const handleMouseEnter = useCallback((frame, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -160,9 +159,7 @@ export default function FrameGrid({ scrubPosition = 1 }) {
         {mockFrames.map((frame) => {
           const isInScrubRange = frame.frameId <= visibleCount;
           const isSelected = selectedFrame?.frameId === frame.frameId;
-          const tileBgUrl = bgUrl
-            ? bgUrl
-            : `url('/backgrounds/frame-${frame.anomalyScore >= 0.7 ? 'synthetic' : 'clean'}.webp')`;
+          const tileBgUrl = bgUrl;
 
           return (
             <FrameTile
