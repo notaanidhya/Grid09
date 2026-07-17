@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 # GRID-9 // Truth Node
 
-![GRID-9 Website]([grid09.vercel.app](https://grid09.vercel.app/))
+GRID09 Website - https://grid09.vercel.app/
 
 > **"Truth decays at 2.4M views per hour. We are the last checkpoint."**
 
